@@ -10,6 +10,8 @@ class RNNmodel(nn.Module):
         # Hyper Parameters
         self.hidden_size = hidden_size
         self.num_layers = num_layers
+
+        # Device either CPU or GPU
         self.device = device
 
         # Define the RNN
@@ -21,16 +23,13 @@ class RNNmodel(nn.Module):
     def forward(self, x):
         batch_size = x.size(0)
         # Create hidden layer
-        hidden_state = self.init_hidden(batch_size)
+        hidden_state = torch.zeros(self.num_layers, batch_size, self.hidden_size).to(self.device)
+
         # Obtaining output and hidden state
         output, hidden_state = self.rnn(x, hidden_state)
+
+        # Make the output look the way it needs to
         output = output.contiguous().view(-1, self.hidden_size)
         output = self.fc(output)
 
         return output, hidden_state
-
-    def init_hidden(self, batch_size):
-        # Initialize hidden state
-        hidden = torch.zeros(self.num_layers, batch_size, self.hidden_size).to(self.device)
-        return hidden
-
